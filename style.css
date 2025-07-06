@@ -45,6 +45,7 @@ header {
     text-align: center;
     margin-bottom: 40px;
     padding: 40px 0;
+    position: relative;
 }
 
 h1 {
@@ -61,6 +62,36 @@ h1 {
     font-size: 20px;
     color: var(--text-secondary);
     font-weight: 400;
+}
+
+/* 设置按钮样式 */
+.settings-btn {
+    position: absolute;
+    top: 40px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--background);
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text-secondary);
+}
+
+.settings-btn:hover {
+    background: var(--surface);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.settings-btn svg {
+    width: 20px;
+    height: 20px;
 }
 
 /* 卡片样式 */
@@ -184,6 +215,53 @@ h2 {
     display: block;
 }
 
+/* 标题输入样式 */
+.title-input-wrapper {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.title-input-wrapper input {
+    flex: 1;
+}
+
+.image-btn {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--background);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-btn:hover {
+    background: var(--surface);
+    border-color: var(--primary-color);
+}
+
+.image-btn svg {
+    width: 20px;
+    height: 20px;
+    color: var(--text-secondary);
+}
+
+.title-image-preview {
+    margin-top: 10px;
+    position: relative;
+    display: inline-block;
+}
+
+.title-image-preview img {
+    max-height: 150px;
+    max-width: 100%;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+}
+
 /* 文本输入样式 */
 #essay-title {
     width: 100%;
@@ -199,6 +277,22 @@ h2 {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
+/* 内容输入包装器样式 */
+.content-input-wrapper {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.content-input-wrapper textarea {
+    flex: 1;
+}
+
+.content-image-btn {
+    margin-top: 0;
+    flex-shrink: 0;
 }
 
 #essay-text {
@@ -217,6 +311,20 @@ h2 {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
+/* 内容图片预览样式 */
+.content-image-preview {
+    margin-top: 10px;
+    position: relative;
+    display: inline-block;
+}
+
+.content-image-preview img {
+    max-height: 200px;
+    max-width: 100%;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
 }
 
 /* 图片上传样式 */
@@ -615,4 +723,257 @@ h2 {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--text-secondary);
+}
+
+/* 弹窗样式 */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content {
+    background: var(--background);
+    border-radius: var(--radius-lg);
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 30px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.modal-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.modal-close:hover {
+    background: var(--surface);
+    color: var(--text-primary);
+}
+
+.modal-body {
+    padding: 30px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.modal-footer {
+    padding: 20px 30px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* 响应式弹窗 */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        max-height: 95vh;
+    }
+    
+    .modal-body {
+        padding: 20px;
+    }
+    
+    .settings-btn {
+        position: static;
+        margin: 20px auto 0;
+    }
+}
+
+/* 考试类型选择样式 */
+.exam-type-section {
+    margin-bottom: 30px;
+}
+
+.exam-type-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.exam-type-option {
+    display: block;
+    cursor: pointer;
+}
+
+.exam-type-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+}
+
+.exam-type-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--background);
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.exam-type-option:hover .exam-type-card {
+    border-color: var(--primary-color);
+    background: var(--surface);
+}
+
+.exam-type-option input[type="radio"]:checked + .exam-type-card {
+    border-color: var(--primary-color);
+    background: rgba(0, 122, 255, 0.05);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
+.exam-type-icon {
+    font-size: 36px;
+    margin-bottom: 12px;
+}
+
+.exam-type-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.exam-type-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+/* 响应式考试类型选择 */
+@media (max-width: 768px) {
+    .exam-type-selector {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+    .exam-type-card {
+        padding: 16px;
+    }
+    
+    .exam-type-icon {
+        font-size: 28px;
+        margin-bottom: 8px;
+    }
+    
+    .exam-type-name {
+        font-size: 16px;
+    }
+    
+    .exam-type-desc {
+        font-size: 12px;
+    }
+}
+
+/* 流式加载占位符样式 */
+.stream-placeholder {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-secondary);
+    font-size: 16px;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* 流式内容渐入动画 */
+.suggestion-item {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* 实时更新的思考内容样式 */
+.thinking-text.streaming {
+    position: relative;
+}
+
+.thinking-text.streaming::after {
+    content: '▊';
+    display: inline-block;
+    animation: blink 1s infinite;
+    color: var(--primary-color);
+    margin-left: 2px;
+}
+
+@keyframes blink {
+    0%, 50% {
+        opacity: 1;
+    }
+    51%, 100% {
+        opacity: 0;
+    }
+}
+
+/* 流式内容高亮效果 */
+.stream-highlight {
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(0, 122, 255, 0.1) 50%,
+        transparent 100%);
+    background-size: 200% 100%;
+    animation: streamHighlight 1s ease-out;
+}
+
+@keyframes streamHighlight {
+    from {
+        background-position: -100% 0;
+    }
+    to {
+        background-position: 100% 0;
+    }
 }

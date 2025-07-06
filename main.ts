@@ -68,10 +68,22 @@ async function handleApiRequest(req: Request): Promise<Response> {
         responseHeaders.set(key, value);
       });
 
-      return new Response(await response.text(), {
-        status: response.status,
-        headers: responseHeaders,
-      });
+      // 检查是否是流式响应
+      const isStream = geminiUrl.includes("streamGenerateContent");
+      
+      if (isStream && response.body) {
+        // 对于流式响应，直接传递响应体
+        return new Response(response.body, {
+          status: response.status,
+          headers: responseHeaders,
+        });
+      } else {
+        // 对于非流式响应，读取完整内容
+        return new Response(await response.text(), {
+          status: response.status,
+          headers: responseHeaders,
+        });
+      }
     } catch (error) {
       console.error("Gemini API error:", error);
       return new Response(JSON.stringify({ error: "API request failed" }), {
@@ -113,10 +125,29 @@ async function handleApiRequest(req: Request): Promise<Response> {
         responseHeaders.set(key, value);
       });
 
-      return new Response(await response.text(), {
-        status: response.status,
-        headers: responseHeaders,
-      });
+      // 检查是否是流式响应
+      const contentType = response.headers.get("content-type");
+      const isStream = contentType?.includes("text/event-stream") ||
+                      (req.method === "POST" && openaiPath.includes("chat/completions"));
+      
+      if (isStream && response.body) {
+        // 对于流式响应，设置正确的 Content-Type
+        responseHeaders.set("Content-Type", "text/event-stream");
+        responseHeaders.set("Cache-Control", "no-cache");
+        responseHeaders.set("Connection", "keep-alive");
+        
+        // 直接传递响应体
+        return new Response(response.body, {
+          status: response.status,
+          headers: responseHeaders,
+        });
+      } else {
+        // 对于非流式响应，读取完整内容
+        return new Response(await response.text(), {
+          status: response.status,
+          headers: responseHeaders,
+        });
+      }
     } catch (error) {
       console.error("OpenAI API error:", error);
       return new Response(JSON.stringify({ error: "API request failed" }), {
