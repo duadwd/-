@@ -37,19 +37,27 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="gemini-key">API Key（可选）</label>
+                        <label for="gemini-key">API Key <span id="gemini-key-status" class="api-status"></span></label>
                         <input type="password" id="gemini-key" placeholder="留空使用服务器配置的密钥">
+                    </div>
+                    <div class="form-group">
+                        <label for="gemini-proxy">API 代理地址（可选）</label>
+                        <input type="url" id="gemini-proxy" placeholder="https://generativelanguage.googleapis.com">
                     </div>
                 </div>
                 
                 <div id="openai-config" class="api-settings" style="display: none;">
                     <div class="form-group">
-                        <label for="openai-base">API 地址</label>
+                        <label for="openai-base">API 基础地址</label>
                         <input type="url" id="openai-base" placeholder="https://api.openai.com" value="https://api.openai.com">
                     </div>
                     <div class="form-group">
                         <label for="openai-key">API Key</label>
                         <input type="password" id="openai-key" placeholder="sk-..." required>
+                    </div>
+                    <div class="form-group">
+                        <label for="openai-proxy">API 代理地址（可选）</label>
+                        <input type="url" id="openai-proxy" placeholder="留空使用基础地址">
                     </div>
                     <div class="form-group">
                         <label for="openai-model">模型</label>
@@ -69,7 +77,14 @@
                 </div>
                 
                 <div id="text-input" class="tab-content active">
-                    <textarea id="essay-text" placeholder="请输入你的英语作文..." rows="10"></textarea>
+                    <div class="form-group">
+                        <label for="essay-title">作文题目</label>
+                        <input type="text" id="essay-title" placeholder="请输入作文题目（可选）">
+                    </div>
+                    <div class="form-group">
+                        <label for="essay-text">作文内容</label>
+                        <textarea id="essay-text" placeholder="请输入你的英语作文..." rows="10"></textarea>
+                    </div>
                 </div>
                 
                 <div id="image-input" class="tab-content">

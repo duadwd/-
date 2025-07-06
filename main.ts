@@ -42,12 +42,15 @@ async function handleApiRequest(req: Request): Promise<Response> {
   // Gemini API proxy
   if (pathname.startsWith("/api/gemini/")) {
     const geminiPath = pathname.replace("/api/gemini/", "");
-    const geminiUrl = `${GEMINI_BASE_URL}/${geminiPath}`;
+    // 使用代理地址或默认地址
+    const proxyUrl = req.headers.get("x-gemini-proxy") || GEMINI_BASE_URL;
+    const geminiUrl = `${proxyUrl}/${geminiPath}`;
     
     try {
       const headers = new Headers(req.headers);
       headers.delete("host");
       headers.delete("connection");
+      headers.delete("x-gemini-proxy");
       
       // Add API key if not provided
       if (!headers.get("x-goog-api-key") && GEMINI_API_KEY) {

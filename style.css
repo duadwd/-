@@ -121,6 +121,14 @@ h2 {
     font-size: 14px;
     font-weight: 500;
     color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.api-status {
+    font-size: 12px;
+    font-weight: normal;
 }
 
 .form-group input,
@@ -177,6 +185,22 @@ h2 {
 }
 
 /* 文本输入样式 */
+#essay-title {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 16px;
+    font-family: inherit;
+    margin-bottom: 16px;
+}
+
+#essay-title:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
 #essay-text {
     width: 100%;
     padding: 16px;
@@ -404,6 +428,25 @@ h2 {
 .corrected-text {
     background: #D1ECF1;
     border: 1px solid #BEE5EB;
+}
+
+/* 修改标记样式 */
+.mark-replace {
+    color: #FF9500;
+    font-weight: bold;
+    margin: 0 2px;
+}
+
+.mark-add {
+    color: #34C759;
+    font-weight: bold;
+    margin: 0 2px;
+}
+
+.mark-delete {
+    color: #FF3B30;
+    font-weight: bold;
+    margin: 0 2px;
 }
 
 .explanation {

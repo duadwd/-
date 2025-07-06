@@ -1,6 +1,7 @@
 // 全局状态
 const state = {
     apiType: 'gemini',
+    essayTitle: '',
     essayContent: '',
     imageData: null,
     isProcessing: false,
@@ -15,14 +16,18 @@ const elements = {
     openaiConfig: document.getElementById('openai-config'),
     geminiModel: document.getElementById('gemini-model'),
     geminiKey: document.getElementById('gemini-key'),
+    geminiProxy: document.getElementById('gemini-proxy'),
+    geminiKeyStatus: document.getElementById('gemini-key-status'),
     openaiBase: document.getElementById('openai-base'),
     openaiKey: document.getElementById('openai-key'),
+    openaiProxy: document.getElementById('openai-proxy'),
     openaiModel: document.getElementById('openai-model'),
     
     // 输入区域
     tabButtons: document.querySelectorAll('.tab-button'),
     textInput: document.getElementById('text-input'),
     imageInput: document.getElementById('image-input'),
+    essayTitle: document.getElementById('essay-title'),
     essayText: document.getElementById('essay-text'),
     uploadArea: document.getElementById('upload-area'),
     fileInput: document.getElementById('file-input'),
@@ -69,7 +74,12 @@ async function loadServerConfig() {
             
             // 如果服务器有 Gemini API Key，显示提示
             if (state.serverConfig.hasGeminiKey) {
-                elements.geminiKey.placeholder = 'API Key 已在服务器配置（可选）';
+                elements.geminiKey.placeholder = '留空使用内置密钥';
+                elements.geminiKeyStatus.textContent = '（内置）';
+                elements.geminiKeyStatus.style.color = 'var(--success-color)';
+            } else {
+                elements.geminiKeyStatus.textContent = '（需要配置）';
+                elements.geminiKeyStatus.style.color = 'var(--warning-color)';
             }
             
             // 设置默认的 OpenAI 配置
@@ -104,6 +114,7 @@ function initializeEventListeners() {
     });
     
     // 文本输入
+    elements.essayTitle.addEventListener('input', handleTitleInput);
     elements.essayText.addEventListener('input', handleTextInput);
     
     // 图片上传
@@ -144,6 +155,11 @@ function handleTabSwitch(e) {
     
     elements.textInput.classList.toggle('active', tab === 'text');
     elements.imageInput.classList.toggle('active', tab === 'image');
+}
+
+// 标题输入处理
+function handleTitleInput(e) {
+    state.essayTitle = e.target.value;
 }
 
 // 文本输入处理
@@ -291,41 +307,76 @@ async function handleSubmit() {
     }
 }
 
-// 使用Gemini API处理
-async function processWithGemini(inputType) {
-    const model = elements.geminiModel.value || state.serverConfig?.defaultGeminiModel || 'gemini-1.5-flash';
-    const apiKey = elements.geminiKey.value;
-    
-    const prompt = `你是一位专业的高中英语老师，请帮助学生修改英语作文。请按照以下格式输出：
+// 详细的作文修改 prompt
+const ESSAY_CORRECTION_PROMPT = `你是一位专业的高中英语老师，正在帮助学生修改英语作文。请严格按照以下五步流程进行修改：
+
+## 第一步：识别并转录手写内容
+如果是图片输入，请先准确识别手写内容，将其完整转录为文本。
+
+## 第二步：理解作文要求
+分析作文题目和要求，明确写作目的、体裁和关键要点。
+
+## 第三步：整体评估
+从以下维度评估作文：
+- 内容完整性：是否充分回应题目要求
+- 结构逻辑：段落安排是否合理，过渡是否自然
+- 语言表达：词汇使用是否恰当，句式是否多样
+- 语法准确性：时态、语态、主谓一致等
+
+## 第四步：逐句修改
+使用以下标记进行修改：
+- 🔄 替换：将错误或不当的表达替换为更好的选择
+- ➕ 添加：补充缺失的内容或连接词
+- ❌ 删除：去除冗余或不当的内容
+
+修改时请：
+1. 保留原文的核心意思
+2. 使修改后的文章更加地道和流畅
+3. 确保语法正确性
+4. 提升表达的准确性和多样性
+
+## 第五步：提供改进建议
+总结主要问题并给出具体的改进建议，帮助学生提高写作水平。
+
+请按照以下格式输出：
 
 <thinking>
-[在这里详细分析作文的问题，包括语法错误、词汇使用、句式结构、逻辑连贯性等]
+[在这里进行详细的分析思考，包括：
+- 作文题目理解
+- 原文主要问题识别
+- 修改思路和策略]
 </thinking>
 
 <suggestions>
 [
   {
-    "title": "错误类型（如：语法错误、词汇使用等）",
-    "original": "原文中的错误句子或段落",
-    "corrected": "修改后的正确句子或段落",
-    "explanation": "详细解释为什么要这样修改"
+    "title": "修改类型",
+    "original": "原文内容",
+    "corrected": "修改后内容（使用修改标记）",
+    "explanation": "修改原因说明"
   }
 ]
-</suggestions>
+</suggestions>`;
 
-请确保输出格式正确，以便程序解析。`;
+// 使用Gemini API处理
+async function processWithGemini(inputType) {
+    const model = elements.geminiModel.value || state.serverConfig?.defaultGeminiModel || 'gemini-1.5-flash';
+    const apiKey = elements.geminiKey.value;
+    const proxyUrl = elements.geminiProxy.value;
+    
+    const prompt = ESSAY_CORRECTION_PROMPT + (state.essayTitle ? `\n\n作文题目：${state.essayTitle}` : '');
 
     let content;
     if (inputType === 'text') {
         content = [
             {
-                text: prompt + '\n\n作文内容：\n' + state.essayContent
+                text: prompt + '\n\n请修改以下作文内容：\n\n' + state.essayContent
             }
         ];
     } else {
         content = [
             {
-                text: prompt
+                text: prompt + '\n\n请识别并修改图片中的手写作文：'
             },
             {
                 inlineData: {
@@ -356,6 +407,11 @@ async function processWithGemini(inputType) {
         headers['x-goog-api-key'] = apiKey;
     }
     
+    // 如果配置了代理地址，添加到请求头
+    if (proxyUrl) {
+        headers['x-gemini-proxy'] = proxyUrl;
+    }
+    
     const response = await fetch(`/api/gemini/v1beta/models/${model}:generateContent`, {
         method: 'POST',
         headers: headers,
@@ -377,26 +433,10 @@ async function processWithGemini(inputType) {
 async function processWithOpenAI(inputType) {
     const apiBase = elements.openaiBase.value || state.serverConfig?.openaiBaseUrl || 'https://api.openai.com';
     const apiKey = elements.openaiKey.value;
+    const proxyUrl = elements.openaiProxy.value;
     const model = elements.openaiModel.value || state.serverConfig?.defaultOpenAIModel || 'gpt-4o-mini';
     
-    const systemPrompt = `你是一位专业的高中英语老师，请帮助学生修改英语作文。请按照以下格式输出：
-
-<thinking>
-[在这里详细分析作文的问题，包括语法错误、词汇使用、句式结构、逻辑连贯性等]
-</thinking>
-
-<suggestions>
-[
-  {
-    "title": "错误类型（如：语法错误、词汇使用等）",
-    "original": "原文中的错误句子或段落",
-    "corrected": "修改后的正确句子或段落",
-    "explanation": "详细解释为什么要这样修改"
-  }
-]
-</suggestions>
-
-请确保输出格式正确，以便程序解析。`;
+    const systemPrompt = ESSAY_CORRECTION_PROMPT + (state.essayTitle ? `\n\n作文题目：${state.essayTitle}` : '');
 
     let messages;
     if (inputType === 'text') {
@@ -407,7 +447,7 @@ async function processWithOpenAI(inputType) {
             },
             {
                 role: 'user',
-                content: '请修改以下作文：\n\n' + state.essayContent
+                content: '请修改以下作文内容：\n\n' + state.essayContent
             }
         ];
     } else {
@@ -421,7 +461,7 @@ async function processWithOpenAI(inputType) {
                 content: [
                     {
                         type: 'text',
-                        text: '请修改图片中的作文：'
+                        text: '请识别并修改图片中的手写作文：'
                     },
                     {
                         type: 'image_url',
@@ -439,7 +479,7 @@ async function processWithOpenAI(inputType) {
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${apiKey}`,
-            'x-api-base': apiBase
+            'x-api-base': proxyUrl || apiBase
         },
         body: JSON.stringify({
             model: model,
@@ -505,10 +545,19 @@ function displayResult(result) {
         result.suggestions.forEach((suggestion, index) => {
             const suggestionEl = document.createElement('div');
             suggestionEl.className = 'suggestion-item';
+            
+            // 处理修改后的内容，确保修改标记正确显示
+            const correctedHtml = suggestion.corrected ?
+                suggestion.corrected
+                    .replace(/🔄/g, '<span class="mark-replace">🔄</span>')
+                    .replace(/➕/g, '<span class="mark-add">➕</span>')
+                    .replace(/❌/g, '<span class="mark-delete">❌</span>')
+                : '';
+            
             suggestionEl.innerHTML = `
                 <div class="suggestion-title">${index + 1}. ${suggestion.title}</div>
                 ${suggestion.original ? `<div class="original-text">原文：${suggestion.original}</div>` : ''}
-                ${suggestion.corrected ? `<div class="corrected-text">修改：${suggestion.corrected}</div>` : ''}
+                ${correctedHtml ? `<div class="corrected-text">修改：${correctedHtml}</div>` : ''}
                 <div class="explanation">${suggestion.explanation}</div>
             `;
             elements.suggestions.appendChild(suggestionEl);
@@ -550,9 +599,11 @@ function copyResult() {
 
 // 重置表单
 function resetForm() {
+    state.essayTitle = '';
     state.essayContent = '';
     state.imageData = null;
     
+    elements.essayTitle.value = '';
     elements.essayText.value = '';
     elements.fileInput.value = '';
     elements.uploadArea.style.display = 'block';
